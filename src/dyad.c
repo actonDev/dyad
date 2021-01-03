@@ -479,6 +479,9 @@ static void stream_setSocketNonBlocking(dyad_Stream *stream, int opt) {
   int flags = fcntl(stream->sockfd, F_GETFL);
   fcntl(stream->sockfd, F_SETFL,
         opt ? (flags | O_NONBLOCK) : (flags & ~O_NONBLOCK));
+  // avoid inheriting socket ownership to child processes with system()
+  // see https://stackoverflow.com/questions/28900184/avoid-socket-inheritance-when-starting-linux-service-from-c-application
+  fcntl(stream->sockfd, F_SETFD, fcntl(stream->sockfd, F_GETFD) | FD_CLOEXEC);
 #endif
 }
 
